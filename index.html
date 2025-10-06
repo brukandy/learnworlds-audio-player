@@ -267,10 +267,10 @@
                     const brightness = (r + g + b) / 3;
                     if (brightness < 50) continue;
                     
-                    // Round colors
-                    const rRound = Math.round(r / 20) * 20;
-                    const gRound = Math.round(g / 20) * 20;
-                    const bRound = Math.round(b / 20) * 20;
+                    // Round colors (max 255)
+                    const rRound = Math.min(255, Math.round(r / 20) * 20);
+                    const gRound = Math.min(255, Math.round(g / 20) * 20);
+                    const bRound = Math.min(255, Math.round(b / 20) * 20);
                     const rgb = `${rRound},${gRound},${bRound}`;
                     
                     colorCount[rgb] = (colorCount[rgb] || 0) + 1;
@@ -287,7 +287,8 @@
                     }
                 }
                 
-                console.log('Top colors:', Object.entries(colorCount).sort((a,b) => b[1] - a[1]).slice(0, 5));
+                const topColors = Object.entries(colorCount).sort((a,b) => b[1] - a[1]).slice(0, 5);
+                console.log('Top colors:', topColors.map(([color, count]) => `${color} (${count})`));
                 
                 callback(`rgb(${dominantColor})`);
             } catch (err) {
