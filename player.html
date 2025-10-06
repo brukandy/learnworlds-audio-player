@@ -124,8 +124,18 @@
         }
 
         toggle.addEventListener('click', () => audio.paused ? audio.play() : audio.pause());
-        rewind.addEventListener('click', () => audio.currentTime = Math.max(0, audio.currentTime - 10));
-        forward.addEventListener('click', () => audio.currentTime = Math.min(audio.duration, audio.currentTime + 10));
+        rewind.addEventListener('click', () => {
+            audio.currentTime = Math.max(0, audio.currentTime - 10);
+            const ratio = audio.duration ? (audio.currentTime / audio.duration) : 0;
+            progressFill.style.width = `${ratio * 100}%`;
+            progressThumb.style.left = `${ratio * 100}%`;
+        });
+        forward.addEventListener('click', () => {
+            audio.currentTime = Math.min(audio.duration, audio.currentTime + 10);
+            const ratio = audio.duration ? (audio.currentTime / audio.duration) : 0;
+            progressFill.style.width = `${ratio * 100}%`;
+            progressThumb.style.left = `${ratio * 100}%`;
+        });
 
         let isDragging = false;
         function updateProgress(e) {
