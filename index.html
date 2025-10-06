@@ -254,21 +254,29 @@
                 
                 console.log('Image data length:', data.length);
             
-                // Color counting
+                // Find vibrant colors (skip dark/black pixels)
                 const colorCount = {};
-                const step = 5; // Sample every 5 pixels for performance
+                const step = 10;
                 
                 for (let i = 0; i < data.length; i += 4 * step) {
-                    // Reduce rounding to keep more color variation
-                    const r = Math.round(data[i] / 5) * 5;
-                    const g = Math.round(data[i + 1] / 5) * 5;
-                    const b = Math.round(data[i + 2] / 5) * 5;
-                    const rgb = `${r},${g},${b}`;
+                    const r = data[i];
+                    const g = data[i + 1];
+                    const b = data[i + 2];
+                    
+                    // Skip very dark colors (brightness < 50)
+                    const brightness = (r + g + b) / 3;
+                    if (brightness < 50) continue;
+                    
+                    // Round colors
+                    const rRound = Math.round(r / 20) * 20;
+                    const gRound = Math.round(g / 20) * 20;
+                    const bRound = Math.round(b / 20) * 20;
+                    const rgb = `${rRound},${gRound},${bRound}`;
                     
                     colorCount[rgb] = (colorCount[rgb] || 0) + 1;
                 }
                 
-                // Find dominant color
+                // Find most common vibrant color
                 let maxCount = 0;
                 let dominantColor = '30,58,138'; // Default blue
                 
@@ -278,6 +286,8 @@
                         dominantColor = color;
                     }
                 }
+                
+                console.log('Top colors:', Object.entries(colorCount).sort((a,b) => b[1] - a[1]).slice(0, 5));
                 
                 callback(`rgb(${dominantColor})`);
             } catch (err) {
