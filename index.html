@@ -237,11 +237,13 @@
         function extractDominantColor(imgElement, callback) {
             try {
                 const canvas = document.getElementById('colorCanvas');
-                const ctx = canvas.getContext('2d');
+                const ctx = canvas.getContext('2d', { willReadFrequently: true });
                 
                 // Set canvas size
                 canvas.width = imgElement.naturalWidth || imgElement.width;
                 canvas.height = imgElement.naturalHeight || imgElement.height;
+                
+                console.log('Canvas size:', canvas.width, 'x', canvas.height);
                 
                 // Draw image
                 ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
@@ -249,6 +251,8 @@
                 // Get image data (may fail due to CORS)
                 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 const data = imageData.data;
+                
+                console.log('Image data length:', data.length);
             
                 // Color counting
                 const colorCount = {};
