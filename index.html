@@ -276,13 +276,27 @@
                     colorCount[rgb] = (colorCount[rgb] || 0) + 1;
                 }
                 
-                // Find most common vibrant color
-                let maxCount = 0;
+                // Find most saturated color (not gray/white)
+                let bestScore = 0;
                 let dominantColor = '30,58,138'; // Default blue
                 
                 for (const [color, count] of Object.entries(colorCount)) {
-                    if (count > maxCount) {
-                        maxCount = count;
+                    const [r, g, b] = color.split(',').map(Number);
+                    
+                    // Skip near-white/gray colors
+                    const isGrayish = Math.abs(r - g) < 30 && Math.abs(g - b) < 30 && Math.abs(r - b) < 30;
+                    if (isGrayish) continue;
+                    
+                    // Calculate saturation score (difference between max and min RGB)
+                    const max = Math.max(r, g, b);
+                    const min = Math.min(r, g, b);
+                    const saturation = max - min;
+                    
+                    // Score = saturation * frequency
+                    const score = saturation * count;
+                    
+                    if (score > bestScore) {
+                        bestScore = score;
                         dominantColor = color;
                     }
                 }
