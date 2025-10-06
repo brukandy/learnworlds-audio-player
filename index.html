@@ -354,14 +354,18 @@
             // Extract dominant color from thumbnail
             if (thumbnailImg && thumbnail) {
                 thumbnailImg.addEventListener('load', function() {
+                    console.log('Image loaded:', title);
                     extractDominantColor(thumbnailImg, (color) => {
+                        console.log('Extracted color for', title, ':', color);
                         card.style.setProperty('--dominant-color', color);
                     });
                 });
                 
                 // If image already loaded
                 if (thumbnailImg.complete) {
+                    console.log('Image already loaded:', title);
                     extractDominantColor(thumbnailImg, (color) => {
+                        console.log('Extracted color for', title, ':', color);
                         card.style.setProperty('--dominant-color', color);
                     });
                 }
