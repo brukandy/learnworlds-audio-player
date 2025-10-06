@@ -19,8 +19,11 @@
         .mobile-audio-title { color: #ffffff; font-size: 1.25rem; font-weight: 600; text-align: center; margin-bottom: 8px; line-height: 1.4; }
         .mobile-audio-subtitle { color: rgba(255,255,255,0.7); font-size: 0.95rem; text-align: center; margin-bottom: 32px; }
         .mobile-audio-progress-section { width: 100%; margin-bottom: 24px; }
-        .mobile-audio-progress-bar { position: relative; height: 4px; background: rgba(255,255,255,0.2); border-radius: 999px; margin-bottom: 8px; cursor: pointer; touch-action: none; }
-        .mobile-audio-progress-fill { position: absolute; left: 0; top: 0; height: 100%; background: #ffffff; border-radius: 999px; width: 0%; transition: width 0.1s linear; pointer-events: none; }
+        .mobile-audio-progress-bar { position: relative; height: 20px; background: transparent; border-radius: 999px; margin-bottom: 8px; cursor: pointer; touch-action: none; display: flex; align-items: center; }
+        .mobile-audio-progress-track { position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 100%; height: 4px; background: rgba(255,255,255,0.2); border-radius: 999px; }
+        .mobile-audio-progress-fill { position: absolute; left: 0; top: 50%; transform: translateY(-50%); height: 4px; background: #ffffff; border-radius: 999px; width: 0%; pointer-events: none; }
+        .mobile-audio-progress-thumb { position: absolute; top: 50%; left: 0%; width: 12px; height: 12px; background: #ffffff; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 2px 4px rgba(0,0,0,0.3); opacity: 0; transition: opacity 0.2s ease; pointer-events: none; z-index: 2; }
+        .mobile-audio-progress-bar:hover .mobile-audio-progress-thumb, .mobile-audio-progress-bar.dragging .mobile-audio-progress-thumb { opacity: 1; }
         .mobile-audio-times { display: flex; justify-content: space-between; font-size: 0.75rem; color: rgba(255,255,255,0.6); font-variant-numeric: tabular-nums; }
         .mobile-audio-controls { display: flex; align-items: center; justify-content: center; gap: 24px; }
         .mobile-audio-btn { background: transparent; border: none; cursor: pointer; padding: 8px; display: flex; align-items: center; justify-content: center; transition: transform 0.15s ease, opacity 0.15s ease; }
@@ -91,7 +94,7 @@
         }
 
         const playerRoot = $('#player');
-        playerRoot.innerHTML = `<div class="mobile-audio-card"><div class="mobile-audio-content"><div class="mobile-audio-thumbnail"><img src="./thumbnails/${thumbFile}" alt="${title}"></div><div class="mobile-audio-title">${title}</div>${subtitle ? `<div class="mobile-audio-subtitle">${subtitle}</div>` : ''}<div class="mobile-audio-progress-section"><div class="mobile-audio-progress-bar"><div class="mobile-audio-progress-fill"></div></div><div class="mobile-audio-times"><span class="mobile-audio-current">0:00</span><span class="mobile-audio-duration">0:00</span></div></div><div class="mobile-audio-controls"><button class="mobile-audio-btn mobile-audio-btn-small mobile-audio-rewind"><svg viewBox="0 0 24 24"><path d="M11.99 5V1l-5 5 5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6h-2c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8zm-1.1 11h-.85v-3.26l-1.01.31v-.69l1.77-.63h.09V16zm4.28-1.76c0 .32-.03.6-.1.82s-.17.42-.29.57-.28.26-.45.33-.37.1-.59.1-.41-.03-.59-.1-.33-.18-.46-.33-.23-.34-.3-.57-.11-.5-.11-.82v-.74c0-.32.03-.6.1-.82s.17-.42.29-.57.28-.26.45-.33.37-.1.59-.1.41.03.59.1.33.18.46.33.23.34.3.57.11.5.11.82v.74zm-.85-.86c0-.19-.01-.35-.04-.48s-.07-.23-.12-.31-.11-.14-.19-.17-.16-.05-.25-.05-.18.02-.25.05-.14.09-.19.17-.09.18-.12.31-.04.29-.04.48v.97c0 .19.01.35.04.48s.07.24.12.32.11.14.19.17.16.05.25.05.18-.02.25-.05.14-.09.19-.17.09-.19.11-.32.04-.29.04-.48v-.97z"/></svg></button><button class="mobile-audio-btn mobile-audio-btn-play mobile-audio-toggle"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button><button class="mobile-audio-btn mobile-audio-btn-small mobile-audio-forward"><svg viewBox="0 0 24 24"><path d="M12 5V1l5 5-5 5V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8zm-.63 11h-.85v-3.26l-1.01.31v-.69l1.77-.63h.09V16zm4.28-1.76c0 .32-.03.6-.1.82s-.17.42-.29.57-.28.26-.45.33-.37.1-.59.10-.41-.03-.59-.1-.33-.18-.46-.33-.23-.34-.3-.57-.11-.5-.11-.82v-.74c0-.32.03-.6.1-.82s.17-.42.29-.57.28-.26.45-.33.37-.1.59-.1.41.03.59.1.33.18.46.33.23.34.3.57.11.5.11.82v.74zm-.85-.86c0-.19-.01-.35-.04-.48s-.07-.23-.12-.31-.11-.14-.19-.17-.16-.05-.25-.05-.18.02-.25.05-.14.09-.19.17-.09.18-.12.31-.04.29-.04.48v.97c0 .19.01.35.04.48s.07.24.12.32.11.14.19.17.16.05.25.05.18-.02.25-.05.14-.09.19-.17.09-.19.11-.32.04-.29.04-.48v-.97z"/></svg></button></div></div><audio class="mobile-audio-hidden" preload="metadata" src="./audio/${audioFile}"></audio></div>`;
+        playerRoot.innerHTML = `<div class="mobile-audio-card"><div class="mobile-audio-content"><div class="mobile-audio-thumbnail"><img src="./thumbnails/${thumbFile}" alt="${title}"></div><div class="mobile-audio-title">${title}</div>${subtitle ? `<div class="mobile-audio-subtitle">${subtitle}</div>` : ''}<div class="mobile-audio-progress-section"><div class="mobile-audio-progress-bar"><div class="mobile-audio-progress-track"></div><div class="mobile-audio-progress-fill"></div><div class="mobile-audio-progress-thumb"></div></div><div class="mobile-audio-times"><span class="mobile-audio-current">0:00</span><span class="mobile-audio-duration">0:00</span></div></div><div class="mobile-audio-controls"><button class="mobile-audio-btn mobile-audio-btn-small mobile-audio-rewind"><svg viewBox="0 0 24 24"><path d="M11.99 5V1l-5 5 5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6h-2c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8zm-1.1 11h-.85v-3.26l-1.01.31v-.69l1.77-.63h.09V16zm4.28-1.76c0 .32-.03.6-.1.82s-.17.42-.29.57-.28.26-.45.33-.37.1-.59.1-.41-.03-.59-.1-.33-.18-.46-.33-.23-.34-.3-.57-.11-.5-.11-.82v-.74c0-.32.03-.6.1-.82s.17-.42.29-.57.28-.26.45-.33.37-.1.59-.1.41.03.59.1.33.18.46.33.23.34.3.57.11.5.11.82v.74zm-.85-.86c0-.19-.01-.35-.04-.48s-.07-.23-.12-.31-.11-.14-.19-.17-.16-.05-.25-.05-.18.02-.25.05-.14.09-.19.17-.09.18-.12.31-.04.29-.04.48v.97c0 .19.01.35.04.48s.07.24.12.32.11.14.19.17.16.05.25.05.18-.02.25-.05.14-.09.19-.17.09-.19.11-.32.04-.29.04-.48v-.97z"/></svg></button><button class="mobile-audio-btn mobile-audio-btn-play mobile-audio-toggle"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button><button class="mobile-audio-btn mobile-audio-btn-small mobile-audio-forward"><svg viewBox="0 0 24 24"><path d="M12 5V1l5 5-5 5V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8zm-.63 11h-.85v-3.26l-1.01.31v-.69l1.77-.63h.09V16zm4.28-1.76c0 .32-.03.6-.1.82s-.17.42-.29.57-.28.26-.45.33-.37.1-.59.10-.41-.03-.59-.1-.33-.18-.46-.33-.23-.34-.3-.57-.11-.5-.11-.82v-.74c0-.32.03-.6.1-.82s.17-.42.29-.57.28-.26.45-.33.37-.1.59-.1.41.03.59.1.33.18.46.33.23.34.3.57.11.5.11.82v.74zm-.85-.86c0-.19-.01-.35-.04-.48s-.07-.23-.12-.31-.11-.14-.19-.17-.16-.05-.25-.05-.18.02-.25.05-.14.09-.19.17-.09.18-.12.31-.04.29-.04.48v.97c0 .19.01.35.04.48s.07.24.12.32.11.14.19.17.16.05.25.05.18-.02.25-.05.14-.09.19-.17.09-.19.11-.32.04-.29.04-.48v-.97z"/></svg></button></div></div><audio class="mobile-audio-hidden" preload="metadata" src="./audio/${audioFile}"></audio></div>`;
 
         const card = $('.mobile-audio-card', playerRoot);
         const audio = $('.mobile-audio-hidden', playerRoot);
@@ -100,6 +103,7 @@
         const forward = $('.mobile-audio-forward', playerRoot);
         const progressBar = $('.mobile-audio-progress-bar', playerRoot);
         const progressFill = $('.mobile-audio-progress-fill', playerRoot);
+        const progressThumb = $('.mobile-audio-progress-thumb', playerRoot);
         const currentTime = $('.mobile-audio-current', playerRoot);
         const durationTime = $('.mobile-audio-duration', playerRoot);
         const thumbnailImg = $('.mobile-audio-thumbnail img', playerRoot);
@@ -128,15 +132,19 @@
             const rect = progressBar.getBoundingClientRect();
             const x = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
             const ratio = Math.min(1, Math.max(0, (x - rect.left) / rect.width));
-            if (isFinite(audio.duration)) audio.currentTime = ratio * audio.duration;
+            if (isFinite(audio.duration)) {
+                audio.currentTime = ratio * audio.duration;
+                progressFill.style.width = `${ratio * 100}%`;
+                progressThumb.style.left = `${ratio * 100}%`;
+            }
         }
 
-        progressBar.addEventListener('mousedown', (e) => { isDragging = true; updateProgress(e); });
-        progressBar.addEventListener('touchstart', (e) => { isDragging = true; updateProgress(e); });
+        progressBar.addEventListener('mousedown', (e) => { isDragging = true; progressBar.classList.add('dragging'); updateProgress(e); });
+        progressBar.addEventListener('touchstart', (e) => { isDragging = true; progressBar.classList.add('dragging'); updateProgress(e); });
         document.addEventListener('mousemove', (e) => { if (isDragging) updateProgress(e); });
         document.addEventListener('touchmove', (e) => { if (isDragging) updateProgress(e); });
-        document.addEventListener('mouseup', () => isDragging = false);
-        document.addEventListener('touchend', () => isDragging = false);
+        document.addEventListener('mouseup', () => { isDragging = false; progressBar.classList.remove('dragging'); });
+        document.addEventListener('touchend', () => { isDragging = false; progressBar.classList.remove('dragging'); });
 
         audio.addEventListener('loadedmetadata', () => durationTime.textContent = fmt(audio.duration));
         audio.addEventListener('timeupdate', () => {
@@ -144,6 +152,7 @@
                 currentTime.textContent = fmt(audio.currentTime);
                 const ratio = audio.duration ? (audio.currentTime / audio.duration) : 0;
                 progressFill.style.width = `${ratio * 100}%`;
+                progressThumb.style.left = `${ratio * 100}%`;
             }
         });
         audio.addEventListener('play', () => setPlayIcon(false));
