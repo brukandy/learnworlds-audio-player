@@ -235,45 +235,51 @@
 
         // Color extraction function
         function extractDominantColor(imgElement, callback) {
-            const canvas = document.getElementById('colorCanvas');
-            const ctx = canvas.getContext('2d');
-            
-            // Set canvas size
-            canvas.width = imgElement.naturalWidth || imgElement.width;
-            canvas.height = imgElement.naturalHeight || imgElement.height;
-            
-            // Draw image
-            ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
-            
-            // Get image data
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const data = imageData.data;
-            
-            // Color counting
-            const colorCount = {};
-            const step = 5; // Sample every 5 pixels for performance
-            
-            for (let i = 0; i < data.length; i += 4 * step) {
-                const r = Math.round(data[i] / 10) * 10;
-                const g = Math.round(data[i + 1] / 10) * 10;
-                const b = Math.round(data[i + 2] / 10) * 10;
-                const rgb = `${r},${g},${b}`;
+            try {
+                const canvas = document.getElementById('colorCanvas');
+                const ctx = canvas.getContext('2d');
                 
-                colorCount[rgb] = (colorCount[rgb] || 0) + 1;
-            }
+                // Set canvas size
+                canvas.width = imgElement.naturalWidth || imgElement.width;
+                canvas.height = imgElement.naturalHeight || imgElement.height;
+                
+                // Draw image
+                ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
+                
+                // Get image data (may fail due to CORS)
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const data = imageData.data;
             
-            // Find dominant color
-            let maxCount = 0;
-            let dominantColor = '30,58,138'; // Default blue
-            
-            for (const [color, count] of Object.entries(colorCount)) {
-                if (count > maxCount) {
-                    maxCount = count;
-                    dominantColor = color;
+                // Color counting
+                const colorCount = {};
+                const step = 5; // Sample every 5 pixels for performance
+                
+                for (let i = 0; i < data.length; i += 4 * step) {
+                    const r = Math.round(data[i] / 10) * 10;
+                    const g = Math.round(data[i + 1] / 10) * 10;
+                    const b = Math.round(data[i + 2] / 10) * 10;
+                    const rgb = `${r},${g},${b}`;
+                    
+                    colorCount[rgb] = (colorCount[rgb] || 0) + 1;
                 }
+                
+                // Find dominant color
+                let maxCount = 0;
+                let dominantColor = '30,58,138'; // Default blue
+                
+                for (const [color, count] of Object.entries(colorCount)) {
+                    if (count > maxCount) {
+                        maxCount = count;
+                        dominantColor = color;
+                    }
+                }
+                
+                callback(`rgb(${dominantColor})`);
+            } catch (err) {
+                // CORS error or other issue - use default color
+                console.warn('Color extraction failed (CORS?), using default color:', err);
+                callback('rgb(30,58,138)'); // Default blue
             }
-            
-            callback(`rgb(${dominantColor})`);
         }
 
         // Initialize all players
