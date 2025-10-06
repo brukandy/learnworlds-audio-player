@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LearnWorlds Mobile Audio Player</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #1a1a2e;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        /* Mobile Audio Player */
+        .mobile-audio-player {
+            width: 100%;
+            max-width: 420px;
+            margin: 0 auto 40px auto;
+        }
+
+        .mobile-audio-card {
+            position: relative;
+            border-radius: 24px;
+            overflow: hidden;
+            background: #0a1929;
+            padding: 40px 24px 32px 24px;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background 0.6s ease;
+        }
+
+        /* Dynamic gradient background */
+        .mobile-audio-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--dominant-color, #1e3a8a) 0%, #0a1929 100%);
+            opacity: 1;
+            z-index: 0;
+            transition: background 0.6s ease;
+        }
+
+        .mobile-audio-content {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Circular Thumbnail */
+        .mobile-audio-thumbnail {
+            width: 240px;
+            height: 240px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-bottom: 32px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            position: relative;
+        }
+
+        .mobile-audio-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Hidden canvas for color extraction */
+        #colorCanvas {
+            display: none;
+        }
+
+        /* Title */
+        .mobile-audio-title {
+            color: #ffffff;
+            font-size: 1.25rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .mobile-audio-subtitle {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.95rem;
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        /* Progress Bar */
+        .mobile-audio-progress-section {
+            width: 100%;
+            margin-bottom: 24px;
+        }
+
+        .mobile-audio-progress-bar {
+            position: relative;
+            height: 4px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 999px;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+
+        .mobile-audio-progress-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: #ffffff;
+            border-radius: 999px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .mobile-audio-times {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.6);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Controls */
+        .mobile-audio-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+        }
+
+        .mobile-audio-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s ease, opacity 0.15s ease;
+        }
+
+        .mobile-audio-btn:active {
+            transform: scale(0.95);
+        }
+
+        .mobile-audio-btn svg {
+            fill: #ffffff;
+        }
+
+        .mobile-audio-btn-small svg {
+            width: 32px;
+            height: 32px;
+        }
+
+        .mobile-audio-btn-play {
+            width: 72px;
+            height: 72px;
+            background: #ffffff;
+            border-radius: 50%;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+
+        .mobile-audio-btn-play svg {
+            fill: #0a1929;
+            width: 32px;
+            height: 32px;
+        }
+
+        .mobile-audio-btn-play:hover {
+            transform: scale(1.05);
+        }
+
+        .mobile-audio-hidden {
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 380px) {
+            .mobile-audio-thumbnail {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .mobile-audio-title {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Example: Mobile Audio Player Instance -->
+    <div class="mobile-audio-player"
+         data-audio-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+         data-title="The 6 Phase Meditation"
+         data-subtitle="Vishen"
+         data-thumbnail="https://images.unsplash.com/photo-1528715471579-d1bcf0ba5e83?q=80&w=800&auto=format&fit=crop">
+    </div>
+
+    <!-- Add more players here with your own audio files -->
+    <!-- 
+    <div class="mobile-audio-player"
+         data-audio-src="./audio/your-track.mp3"
+         data-title="Your Track Title"
+         data-subtitle="Author Name"
+         data-thumbnail="./thumbnails/your-image.jpg">
+    </div>
+    -->
+
+    <!-- Hidden canvas for color extraction -->
+    <canvas id="colorCanvas"></canvas>
+
+    <script>
+    (function initMobileAudioPlayer() {
+        function $(sel, root = document) { return root.querySelector(sel); }
+        function $all(sel, root = document) { return Array.from(root.querySelectorAll(sel)); }
+        function fmt(t) { 
+            if (!isFinite(t) || t < 0) return '0:00'; 
+            const m = Math.floor(t / 60);
+            const s = Math.floor(t % 60).toString().padStart(2, '0'); 
+            return `${m}:${s}`; 
+        }
+
+        // Color extraction function
+        function extractDominantColor(imgElement, callback) {
+            const canvas = document.getElementById('colorCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size
+            canvas.width = imgElement.naturalWidth || imgElement.width;
+            canvas.height = imgElement.naturalHeight || imgElement.height;
+            
+            // Draw image
+            ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
+            
+            // Get image data
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            
+            // Color counting
+            const colorCount = {};
+            const step = 5; // Sample every 5 pixels for performance
+            
+            for (let i = 0; i < data.length; i += 4 * step) {
+                const r = Math.round(data[i] / 10) * 10;
+                const g = Math.round(data[i + 1] / 10) * 10;
+                const b = Math.round(data[i + 2] / 10) * 10;
+                const rgb = `${r},${g},${b}`;
+                
+                colorCount[rgb] = (colorCount[rgb] || 0) + 1;
+            }
+            
+            // Find dominant color
+            let maxCount = 0;
+            let dominantColor = '30,58,138'; // Default blue
+            
+            for (const [color, count] of Object.entries(colorCount)) {
+                if (count > maxCount) {
+                    maxCount = count;
+                    dominantColor = color;
+                }
+            }
+            
+            callback(`rgb(${dominantColor})`);
+        }
+
+        // Initialize all players
+        $all('.mobile-audio-player').forEach((playerRoot) => {
+            const src = playerRoot.getAttribute('data-audio-src');
+            const title = playerRoot.getAttribute('data-title') || 'Audio Track';
+            const subtitle = playerRoot.getAttribute('data-subtitle') || '';
+            const thumbnail = playerRoot.getAttribute('data-thumbnail') || '';
+
+            if (!src) {
+                playerRoot.innerHTML = '<div style="color:#f00;padding:20px;">Errore: manca data-audio-src</div>';
+                return;
+            }
+
+            playerRoot.innerHTML = `
+                <div class="mobile-audio-card">
+                    <div class="mobile-audio-content">
+                        <div class="mobile-audio-thumbnail">
+                            <img src="${thumbnail}" alt="${title}" crossorigin="anonymous">
+                        </div>
+                        
+                        <div class="mobile-audio-title">${title}</div>
+                        ${subtitle ? `<div class="mobile-audio-subtitle">${subtitle}</div>` : ''}
+                        
+                        <div class="mobile-audio-progress-section">
+                            <div class="mobile-audio-progress-bar">
+                                <div class="mobile-audio-progress-fill"></div>
+                            </div>
+                            <div class="mobile-audio-times">
+                                <span class="mobile-audio-current">0:00</span>
+                                <span class="mobile-audio-duration">0:00</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mobile-audio-controls">
+                            <button class="mobile-audio-btn mobile-audio-btn-small mobile-audio-rewind" aria-label="Indietro 10 secondi">
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M11.99 5V1l-5 5 5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6h-2c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8zm-1.1 11h-.85v-3.26l-1.01.31v-.69l1.77-.63h.09V16zm4.28-1.76c0 .32-.03.6-.1.82s-.17.42-.29.57-.28.26-.45.33-.37.1-.59.1-.41-.03-.59-.1-.33-.18-.46-.33-.23-.34-.3-.57-.11-.5-.11-.82v-.74c0-.32.03-.6.1-.82s.17-.42.29-.57.28-.26.45-.33.37-.1.59-.1.41.03.59.1.33.18.46.33.23.34.3.57.11.5.11.82v.74zm-.85-.86c0-.19-.01-.35-.04-.48s-.07-.23-.12-.31-.11-.14-.19-.17-.16-.05-.25-.05-.18.02-.25.05-.14.09-.19.17-.09.18-.12.31-.04.29-.04.48v.97c0 .19.01.35.04.48s.07.24.12.32.11.14.19.17.16.05.25.05.18-.02.25-.05.14-.09.19-.17.09-.19.11-.32.04-.29.04-.48v-.97z"/>
+                                </svg>
+                            </button>
+                            
+                            <button class="mobile-audio-btn mobile-audio-btn-play mobile-audio-toggle" aria-label="Play/Pause">
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                            </button>
+                            
+                            <button class="mobile-audio-btn mobile-audio-btn-small mobile-audio-forward" aria-label="Avanti 10 secondi">
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 5V1l5 5-5 5V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8zm-.63 11h-.85v-3.26l-1.01.31v-.69l1.77-.63h.09V16zm4.28-1.76c0 .32-.03.6-.1.82s-.17.42-.29.57-.28.26-.45.33-.37.1-.59.1-.41-.03-.59-.1-.33-.18-.46-.33-.23-.34-.3-.57-.11-.5-.11-.82v-.74c0-.32.03-.6.1-.82s.17-.42.29-.57.28-.26.45-.33.37-.1.59-.1.41.03.59.1.33.18.46.33.23.34.3.57.11.5.11.82v.74zm-.85-.86c0-.19-.01-.35-.04-.48s-.07-.23-.12-.31-.11-.14-.19-.17-.16-.05-.25-.05-.18.02-.25.05-.14.09-.19.17-.09.18-.12.31-.04.29-.04.48v.97c0 .19.01.35.04.48s.07.24.12.32.11.14.19.17.16.05.25.05.18-.02.25-.05.14-.09.19-.17.09-.19.11-.32.04-.29.04-.48v-.97z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <audio class="mobile-audio-hidden" preload="metadata" src="${src}"></audio>
+                </div>
+            `;
+
+            // Get elements
+            const card = $('.mobile-audio-card', playerRoot);
+            const audio = $('.mobile-audio-hidden', playerRoot);
+            const toggle = $('.mobile-audio-toggle', playerRoot);
+            const rewind = $('.mobile-audio-rewind', playerRoot);
+            const forward = $('.mobile-audio-forward', playerRoot);
+            const progressBar = $('.mobile-audio-progress-bar', playerRoot);
+            const progressFill = $('.mobile-audio-progress-fill', playerRoot);
+            const currentTime = $('.mobile-audio-current', playerRoot);
+            const durationTime = $('.mobile-audio-duration', playerRoot);
+            const thumbnailImg = $('.mobile-audio-thumbnail img', playerRoot);
+
+            // Extract dominant color from thumbnail
+            if (thumbnailImg && thumbnail) {
+                thumbnailImg.addEventListener('load', function() {
+                    extractDominantColor(thumbnailImg, (color) => {
+                        card.style.setProperty('--dominant-color', color);
+                    });
+                });
+                
+                // If image already loaded
+                if (thumbnailImg.complete) {
+                    extractDominantColor(thumbnailImg, (color) => {
+                        card.style.setProperty('--dominant-color', color);
+                    });
+                }
+            }
+
+            // Play/Pause icons
+            function setPlayIcon(paused) {
+                const playIcon = '<path d="M8 5v14l11-7z"/>';
+                const pauseIcon = '<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>';
+                const svg = toggle.querySelector('svg');
+                svg.innerHTML = paused ? playIcon : pauseIcon;
+            }
+
+            // Event listeners
+            toggle.addEventListener('click', () => {
+                if (audio.paused) {
+                    audio.play().catch(err => console.error('Play error:', err));
+                } else {
+                    audio.pause();
+                }
+            });
+
+            rewind.addEventListener('click', () => {
+                audio.currentTime = Math.max(0, audio.currentTime - 10);
+            });
+
+            forward.addEventListener('click', () => {
+                audio.currentTime = Math.min(audio.duration, audio.currentTime + 10);
+            });
+
+            progressBar.addEventListener('click', (e) => {
+                const rect = progressBar.getBoundingClientRect();
+                const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+                if (isFinite(audio.duration)) {
+                    audio.currentTime = ratio * audio.duration;
+                }
+            });
+
+            // Audio events
+            audio.addEventListener('loadedmetadata', () => {
+                durationTime.textContent = fmt(audio.duration);
+            });
+
+            audio.addEventListener('timeupdate', () => {
+                currentTime.textContent = fmt(audio.currentTime);
+                const ratio = audio.duration ? (audio.currentTime / audio.duration) : 0;
+                progressFill.style.width = `${ratio * 100}%`;
+            });
+
+            audio.addEventListener('play', () => setPlayIcon(false));
+            audio.addEventListener('pause', () => setPlayIcon(true));
+            audio.addEventListener('ended', () => setPlayIcon(true));
+
+            audio.addEventListener('error', (e) => {
+                console.error('Audio error:', e, audio.error);
+                playerRoot.innerHTML = '<div style="color:#f00;padding:20px;">Errore caricamento audio</div>';
+            });
+
+            setPlayIcon(true);
+        });
+    })();
+    </script>
+</body>
+</html>
