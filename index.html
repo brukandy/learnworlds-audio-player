@@ -259,9 +259,10 @@
                 const step = 5; // Sample every 5 pixels for performance
                 
                 for (let i = 0; i < data.length; i += 4 * step) {
-                    const r = Math.round(data[i] / 10) * 10;
-                    const g = Math.round(data[i + 1] / 10) * 10;
-                    const b = Math.round(data[i + 2] / 10) * 10;
+                    // Reduce rounding to keep more color variation
+                    const r = Math.round(data[i] / 5) * 5;
+                    const g = Math.round(data[i + 1] / 5) * 5;
+                    const b = Math.round(data[i + 2] / 5) * 5;
                     const rgb = `${r},${g},${b}`;
                     
                     colorCount[rgb] = (colorCount[rgb] || 0) + 1;
