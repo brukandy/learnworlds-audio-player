@@ -288,6 +288,7 @@
             const title = playerRoot.getAttribute('data-title') || 'Audio Track';
             const subtitle = playerRoot.getAttribute('data-subtitle') || '';
             const thumbnail = playerRoot.getAttribute('data-thumbnail') || '';
+            const manualColor = playerRoot.getAttribute('data-bg-color'); // Manual color override
 
             if (!src) {
                 playerRoot.innerHTML = '<div style="color:#f00;padding:20px;">Errore: manca data-audio-src</div>';
@@ -298,7 +299,7 @@
                 <div class="mobile-audio-card">
                     <div class="mobile-audio-content">
                         <div class="mobile-audio-thumbnail">
-                            <img src="${thumbnail}" alt="${title}" crossorigin="anonymous">
+                            <img src="${thumbnail}" alt="${title}">
                         </div>
                         
                         <div class="mobile-audio-title">${title}</div>
